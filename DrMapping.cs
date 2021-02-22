@@ -8,11 +8,11 @@ namespace HtecDakarRallyWebApi
     {
         public DrMapping()
         {
-            CreateMap<CreateRaceRequestDTO, Race>();
-            CreateMap<Race, CreateRaceResponseDTO>();
+            CreateMap<RaceRequestDTO, Race>();
+            CreateMap<Race, RaceDTO>();
 
             CreateMap<VehicleRequestDTO, Vehicle>();
-            CreateMap<Vehicle, VehicleResponseDTO>();
+            CreateMap<Vehicle, VehicleDTO>();
 
             CreateMap<LeaderboardItem, LeaderboardItemDTO>();
             CreateMap<Leaderboard, LeaderboardDTO>();
@@ -21,6 +21,7 @@ namespace HtecDakarRallyWebApi
             CreateMap<VehicleStat, VehicleStatDTO>();
 
             CreateMap<SearchParmsDTO, SearchParams>();
+            CreateMap<SearchParams, SearchParmsDTO>();
             CreateMap<SearchResult, SearchResultDTO>();
 
             CreateMap<RaceStat, RaceStatDTO>();

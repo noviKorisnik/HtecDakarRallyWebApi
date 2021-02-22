@@ -80,7 +80,7 @@ namespace HtecDakarRallyWebApi.Controllers
         //AND/OR distance,
         //sort order)
         [HttpGet("find")]
-        public async Task<ActionResult<SearchResultDTO>> Find([FromQuery]SearchParmsDTO search)
+        public async Task<ActionResult<SearchResultDTO>> Find([FromQuery] SearchParmsDTO search)
         {
             try
             {
@@ -90,14 +90,6 @@ namespace HtecDakarRallyWebApi.Controllers
             {
                 return BadRequest(e.DrMsgObject());
             }
-        }
-
-
-
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<VehicleResponseDTO>>> GetAllVehicles()
-        {
-            return Ok(await _service.GetAllVehicles());
         }
     }
 }

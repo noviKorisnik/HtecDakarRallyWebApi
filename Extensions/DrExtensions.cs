@@ -5,11 +5,74 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 
 namespace HtecDakarRallyWebApi.Extensions
 {
     public static class DrExtensions
     {
+        public static async Task<SearchResult> FindVehicles(this DrDbContext context, SearchParams search)
+        {
+            IQueryable<Vehicle> query = context.Vehicles.Include("Race").Where
+            (
+                vehicle => true
+                    && (!search.Id.HasValue || vehicle.Id == search.Id.Value)
+                    && (!search.RaceId.HasValue || vehicle.RaceId == search.RaceId.Value)
+                    && (string.IsNullOrWhiteSpace(search.Team) || vehicle.Team.Contains(search.Team, StringComparison.InvariantCultureIgnoreCase))
+                    && (string.IsNullOrWhiteSpace(search.Team) || vehicle.Team.Contains(search.Team, StringComparison.InvariantCultureIgnoreCase))
+                    && (!search.FromYear.HasValue || vehicle.Race.Year >= search.FromYear.Value)
+                    && (!search.ToYear.HasValue || vehicle.Race.Year <= search.ToYear.Value)
+                    && (!search.ManufacturedFrom.HasValue || vehicle.Manufactured >= search.ManufacturedFrom.Value)
+                    && (!search.ManufacturedTo.HasValue || vehicle.Manufactured <= search.ManufacturedTo.Value)
+                    && (!search.FromDistance.HasValue || vehicle.Distance >= search.FromDistance.Value)
+                    && (!search.ToDistance.HasValue || vehicle.Distance <= search.ToDistance.Value)
+                    && (search.Class == null || search.Class.Count == 0 || search.Class.Contains(vehicle.Class))
+                    && (search.Type == null || search.Type.Count == 0 || search.Type.Contains(vehicle.Type))
+                    && (search.Status == null || search.Status.Count == 0 || search.Status.Contains(vehicle.Status))
+            )
+            .SortOrder(search.SortOrder);
+            
+            return new SearchResult(search, await query.ToListAsync());
+        }
+        public static IQueryable<Vehicle> SortOrder(this IQueryable<Vehicle> query, ICollection<SortOrderEnum> orderBy)
+        {
+            try
+            {
+                orderBy.Where(o => o != SortOrderEnum.None).ToList().ForEach(sort => query = query.SortBy(sort));
+            }
+            catch { }
+            return query;
+        }
+        public static IQueryable<Vehicle> SortBy(this IQueryable<Vehicle> query, SortOrderEnum orderBy)
+        {
+            IOrderedQueryable<Vehicle> ordered = query as IOrderedQueryable<Vehicle>;
+            switch (orderBy)
+            {
+                case SortOrderEnum.Id: try { return ordered.ThenBy(v => v.Id); } catch { return query.OrderBy(v => v.Id); }
+                case SortOrderEnum.IdDesc: try { return ordered.ThenByDescending(v => v.Id); } catch { return query.OrderByDescending(v => v.Id); }
+                case SortOrderEnum.Year: try { return ordered.ThenBy(v => v.Race.Year); } catch { return query.OrderBy(v => v.Race.Year); }
+                case SortOrderEnum.YearDesc: try { return ordered.ThenByDescending(v => v.Race.Year); } catch { return query.OrderByDescending(v => v.Race.Year); }
+                case SortOrderEnum.Team: try { return ordered.ThenBy(v => v.Team); } catch { return query.OrderBy(v => v.Team); }
+                case SortOrderEnum.TeamDesc: try { return ordered.ThenByDescending(v => v.Team); } catch { return query.OrderByDescending(v => v.Team); }
+                case SortOrderEnum.Model: try { return ordered.ThenBy(v => v.Model); } catch { return query.OrderBy(v => v.Model); }
+                case SortOrderEnum.ModelDesc: try { return ordered.ThenByDescending(v => v.Model); } catch { return query.OrderByDescending(v => v.Model); }
+                case SortOrderEnum.Manufactured: try { return ordered.ThenBy(v => v.Manufactured); } catch { return query.OrderBy(v => v.Manufactured); }
+                case SortOrderEnum.ManufacturedDesc: try { return ordered.ThenByDescending(v => v.Manufactured); } catch { return query.OrderByDescending(v => v.Manufactured); }
+                case SortOrderEnum.Class: try { return ordered.ThenBy(v => v.Class); } catch { return query.OrderBy(v => v.Class); }
+                case SortOrderEnum.ClassDesc: try { return ordered.ThenByDescending(v => v.Class); } catch { return query.OrderByDescending(v => v.Class); }
+                case SortOrderEnum.Type: try { return ordered.ThenBy(v => v.Type); } catch { return query.OrderBy(v => v.Type); }
+                case SortOrderEnum.TypeDesc: try { return ordered.ThenByDescending(v => v.Type); } catch { return query.OrderByDescending(v => v.Type); }
+                case SortOrderEnum.Status: try { return ordered.ThenBy(v => v.Status); } catch { return query.OrderBy(v => v.Status); }
+                case SortOrderEnum.StatusDesc: try { return ordered.ThenByDescending(v => v.Status); } catch { return query.OrderByDescending(v => v.Status); }
+                case SortOrderEnum.Distance: try { return ordered.ThenBy(v => v.Distance); } catch { return query.OrderBy(v => v.Distance); }
+                case SortOrderEnum.DistanceDesc: try { return ordered.ThenByDescending(v => v.Distance); } catch { return query.OrderByDescending(v => v.Distance); }
+                case SortOrderEnum.FinishTime: try { return ordered.ThenBy(v => v.FinishTime); } catch { return query.OrderBy(v => v.FinishTime); }
+                case SortOrderEnum.FinishTimeDesc: try { return ordered.ThenByDescending(v => v.FinishTime); } catch { return query.OrderByDescending(v => v.FinishTime); }
+                default: return query;
+            };
+        }
+
+
         public static TimeSpan CurrentTimeSpan(this Race race, uint? newMultiplier = null)
         {
             DateTime now = DateTime.Now;
@@ -196,7 +259,7 @@ namespace HtecDakarRallyWebApi.Extensions
                 context
                 .Races
                 .Include("Vehicles.VehicleEvents")
-                .Where(r => raceId.HasValue ? r.Id == raceId.Value : r.Status == RaceStatusEnum.Running)
+                .Where(r => raceId.HasValue ? (r.Id == raceId.Value) : (r.Status == RaceStatusEnum.Running))
                 .SingleOrDefaultAsync();
             if (race == null)
             {

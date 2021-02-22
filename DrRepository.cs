@@ -136,9 +136,13 @@ namespace HtecDakarRallyWebApi
         //sort order)
         public async Task<SearchResult> FindVehicles(SearchParams search)
         {
-            await _context.GetUpdatedRace();
+            try
+            {
+                await _context.GetUpdatedRace();
+            }
+            catch { }
 
-            throw new NotImplementedException();
+            return await _context.FindVehicles(search);
         }
 
         //10. Get race status that includes:

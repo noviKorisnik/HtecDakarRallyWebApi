@@ -22,7 +22,7 @@ namespace HtecDakarRallyWebApi.Controllers
         //1. Create race
         //(parameters: year)
         [HttpPost]
-        public async Task<ActionResult<CreateRaceResponseDTO>> Create(CreateRaceRequestDTO race)
+        public async Task<ActionResult<RaceDTO>> Create(RaceRequestDTO race)
         {
             try
             {
@@ -38,7 +38,7 @@ namespace HtecDakarRallyWebApi.Controllers
         //available only prior to the race start
         //(parameters: vehicle)
         [HttpPost("{raceId}/AddVehicle")]
-        public async Task<ActionResult<VehicleResponseDTO>> AddVehicle(int raceId, VehicleRequestDTO vehicle)
+        public async Task<ActionResult<VehicleDTO>> AddVehicle(int raceId, VehicleRequestDTO vehicle)
         {
             try
             {
@@ -141,13 +141,6 @@ namespace HtecDakarRallyWebApi.Controllers
                 return BadRequest(e.DrMsgObject());
             }
 
-        }
-
-
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<CreateRaceResponseDTO>>> GetAllRaces()
-        {
-            return Ok(await _service.GetAllRaces());
         }
     }
 }

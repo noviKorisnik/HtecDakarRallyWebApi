@@ -1,6 +1,6 @@
 namespace HtecDakarRallyWebApi.DataTransferObjects
 {
-    public class VehicleResponseDTO
+    public class VehicleDTO
     {
         public int Id { get; set; }
         public int RaceId { get; set; }
@@ -9,5 +9,8 @@ namespace HtecDakarRallyWebApi.DataTransferObjects
         public int Manufactured { get; set; }
         public string Class { get; set; }
         public string Type { get; set; }
+        public string Status { get; set; }
+        public double Distance { get; set; }
+        public string FinishTime { get; set; }
     }
 }

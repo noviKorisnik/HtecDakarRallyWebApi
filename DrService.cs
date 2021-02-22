@@ -23,20 +23,20 @@ namespace HtecDakarRallyWebApi
 
         //1. Create race
         //(parameters: year)
-        public async Task<CreateRaceResponseDTO> CreateRace(CreateRaceRequestDTO raceDTO)
+        public async Task<RaceDTO> CreateRace(RaceRequestDTO raceDTO)
         {
-            return _mapper.Map<Race, CreateRaceResponseDTO>
+            return _mapper.Map<Race, RaceDTO>
             (
-                await _repository.CreateRace(_mapper.Map<CreateRaceRequestDTO, Race>(raceDTO))
+                await _repository.CreateRace(_mapper.Map<RaceRequestDTO, Race>(raceDTO))
             );
         }
 
         //2. Add vehicle to the race
         //available only prior to the race start
         //(parameters: vehicle)
-        public async Task<VehicleResponseDTO> AddVehicle(int raceId, VehicleRequestDTO vehicleDTO)
+        public async Task<VehicleDTO> AddVehicle(int raceId, VehicleRequestDTO vehicleDTO)
         {
-            return _mapper.Map<Vehicle, VehicleResponseDTO>
+            return _mapper.Map<Vehicle, VehicleDTO>
             (
                 await _repository.AddVehicle(raceId, _mapper.Map<VehicleRequestDTO, Vehicle>(vehicleDTO))
             );
@@ -115,13 +115,9 @@ namespace HtecDakarRallyWebApi
 
 
 
-        public async Task<IEnumerable<VehicleResponseDTO>> GetAllVehicles()
+        public async Task<IEnumerable<VehicleDTO>> GetAllVehicles()
         {
-            return _mapper.Map<IEnumerable<Vehicle>, IEnumerable<VehicleResponseDTO>>(await _repository.GetAllVehicles());
-        }
-        public async Task<IEnumerable<CreateRaceResponseDTO>> GetAllRaces()
-        {
-            return _mapper.Map<IEnumerable<Race>, IEnumerable<CreateRaceResponseDTO>>(await _repository.GetAllRaces());
+            return _mapper.Map<IEnumerable<Vehicle>, IEnumerable<VehicleDTO>>(await _repository.GetAllVehicles());
         }
 
 

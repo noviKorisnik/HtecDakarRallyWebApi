@@ -3,6 +3,8 @@ namespace HtecDakarRallyWebApi.Enumerations
     public enum SortOrderEnum
     {
         None,
+        Id,
+        IdDesc,
         Year,
         YearDesc,
         Team,

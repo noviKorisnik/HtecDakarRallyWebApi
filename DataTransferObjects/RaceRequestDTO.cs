@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace HtecDakarRallyWebApi.DataTransferObjects
 {
-    public class CreateRaceRequestDTO
+    public class RaceRequestDTO
     {
         [Required]
         [Range(DrConstants.RaceStartYear, DrConstants.RaceEndYear)]
