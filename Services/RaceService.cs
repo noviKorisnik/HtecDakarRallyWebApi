@@ -6,6 +6,7 @@ using AutoMapper;
 using HtecDakarRallyWebApi.Models;
 using System.Linq;
 using HtecDakarRallyWebApi.Repositories;
+using HtecDakarRallyWebApi.Extensions;
 
 namespace HtecDakarRallyWebApi.Services
 {
@@ -69,25 +70,23 @@ namespace HtecDakarRallyWebApi.Services
         //number of vehicles grouped by vehicle status,
         //number of vehicles grouped by vehicle type
         //(parameters: race identifier)
-        public async Task<RaceStatDTO> GetStatus(int raceId){
+        public async Task<RaceStatDTO> GetStatus(int raceId)
+        {
             return _mapper.Map<RaceStat, RaceStatDTO>(await _repository.GetStatus(raceId));
         }
 
         //Mock
         public async Task<object> Mock()
         {
-            await _repository.CreateRace(new Race() { Year = 1997, });
+            _context.VehicleEvents.RemoveRange(_context.VehicleEvents);
+            _context.Vehicles.RemoveRange(_context.Vehicles);
+            _context.Races.RemoveRange(_context.Races);
+            await _context.SaveChangesAsync();
 
-            for (int i = 1; i <= 5; i++)
-            {
-                await _repository.AddVehicle(1, new Vehicle()
-                {
-                    Team = "team" + i.ToString(),
-                    Model = "model",
-                    Manufactured = 1900,
-                    Class = (Enumerations.VehicleClassEnum)i,
-                });
-            }
+            Race race = await _repository.CreateRace(new Race() { Year = 1997, });
+            race.Vehicles = _context.Vehicles.Where(v => v.RaceId == race.Id).ToList();
+            race.GenerateVehicles(42);
+            await _context.SaveChangesAsync();
 
             _repository.SetMultiplier(60);
 

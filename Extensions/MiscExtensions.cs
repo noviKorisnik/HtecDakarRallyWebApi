@@ -11,6 +11,24 @@ namespace HtecDakarRallyWebApi.Extensions
 {
     public static class MiscExtensions
     {
+
+        public static void GenerateVehicles(this Race race, int count)
+        {
+            for (var i = 0; i < count; i++)
+            {
+                try
+                {
+                    race.Vehicles.Add(Generator.Vehicle(race));
+                }
+                catch { }
+            }
+        }
+
+        public static T Some<T>(this List<T> list)
+        {
+            return list[DrConstants.Random.Next(list.Count)];
+        }
+
         public static object DrMsgObject(this Exception exception, bool callback = false)
         {
             if (exception == null)
