@@ -11,12 +11,20 @@ namespace HtecDakarRallyWebApi.DataTransferObjects
     //sort order)
     public class SearchParmsDTO
     {
-        public bool AndOr { get; set; }//true means OR, false means AND, for example
+        public int? RaceId { get; set; }
+        public int? FromYear { get; set; }
+        public int? ToYear { get; set; }
+        public int? Id { get; set; }
         public string Team { get; set; }
         public string Model { get; set; }
-        public int? Manufactured { get; set; }
-        public string Status { get; set; }
-        public double Distance { get; set; }
-        public string SortOrder { get; set; }
+        public int? ManufacturedFrom { get; set; }
+        public int? ManufacturedTo { get; set; }
+        public string[] Class { get; set; }
+        public string[] Type { get; set; }
+        public string[] Status { get; set; }
+        public int? FromDistance { get; set; }
+        public int? ToDistance { get; set; }
+        public string[] SortOrder { get; set; }
+//        public string[] GroupBy { get; set; }
     }
 }

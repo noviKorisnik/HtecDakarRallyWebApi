@@ -236,8 +236,12 @@ namespace HtecDakarRallyWebApi.Extensions
         {
             Dictionary<VehicleTypeEnum, int> dictionary = new Dictionary<VehicleTypeEnum, int>();
             Enum.GetValues<VehicleTypeEnum>().ToList().ForEach(value =>
-                dictionary.Add(value, race.Vehicles.Count(vehicle => vehicle.Type == value))
-            );
+            {
+                if (value != VehicleTypeEnum.None)
+                {
+                    dictionary.Add(value, race.Vehicles.Count(vehicle => vehicle.Type == value));
+                };
+            });
             return dictionary;
         }
 
