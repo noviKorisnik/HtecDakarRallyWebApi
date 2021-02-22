@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using HtecDakarRallyWebApi.DataTransferObjects;
 using AutoMapper;
 using HtecDakarRallyWebApi.Extensions;
+using HtecDakarRallyWebApi.Services;
 
 namespace HtecDakarRallyWebApi.Controllers
 {
@@ -12,9 +13,9 @@ namespace HtecDakarRallyWebApi.Controllers
     [ApiController]
     public class MockController : ControllerBase
     {
-        private readonly DrService _service;
+        private readonly RaceService _service;
 
-        public MockController(DrService service)
+        public MockController(RaceService service)
         {
             _service = service;
         }

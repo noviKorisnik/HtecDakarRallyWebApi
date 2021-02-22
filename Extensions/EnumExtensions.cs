@@ -10,30 +10,17 @@ namespace HtecDakarRallyWebApi.Extensions
 {
     public static class EnumExtensions
     {
-        public static void Check(this VehicleTypeEnum vehicleType)
+        public static bool IsFinishStatus(this VehicleStatusEnum status)
         {
-            if (vehicleType == VehicleTypeEnum.None || DrConstants.IsNumericRegex.IsMatch(vehicleType.ToString()))
-            {
-                throw new DrException("Unsupported vehicle type.");
-            }
-        }
-        public static int RepairTime(this VehicleTypeEnum vehicleType)
-        {
-            switch (vehicleType)
-            {
-                case VehicleTypeEnum.Car: return 5;
-                case VehicleTypeEnum.Truck: return 7;
-                case VehicleTypeEnum.Motorcycle: return 3;
-                default: throw new DrException("Unsupported vehicle type.");
-            }
+            return status == VehicleStatusEnum.Broken || status == VehicleStatusEnum.Finished;
         }
 
-        public static void Check(this VehicleClassEnum vehicleClass)
+        public static VehicleStatusEnum ToVehicleStatus(this MalfunctionTypeEnum malfunctionType)
         {
-            if (vehicleClass == VehicleClassEnum.None || DrConstants.IsNumericRegex.IsMatch(vehicleClass.ToString()))
-            {
-                throw new DrException("Unsupported vehicle class.");
-            }
+            return
+                malfunctionType == MalfunctionTypeEnum.Light
+                ? VehicleStatusEnum.InRepairment
+                : VehicleStatusEnum.Broken;
         }
         public static VehicleTypeEnum ToVehicleTypeEnum(this VehicleClassEnum vehicleClass)
         {
@@ -51,6 +38,15 @@ namespace HtecDakarRallyWebApi.Extensions
                     throw new DrException("Unsupported vehicle type.");
             }
         }
+
+        public static void Check(this VehicleClassEnum vehicleClass)
+        {
+            if (vehicleClass == VehicleClassEnum.None || DrConstants.IsNumericRegex.IsMatch(vehicleClass.ToString()))
+            {
+                throw new DrException("Unsupported vehicle class.");
+            }
+        }
+
         public static int MaxSpeed(this VehicleClassEnum vehicleClass)
         {
             switch (vehicleClass)
@@ -62,6 +58,16 @@ namespace HtecDakarRallyWebApi.Extensions
                 case VehicleClassEnum.SportMotorcycle: return 130;
                 default: throw new DrException("Unsupported vehicle class.");
             };
+        }
+        public static int RepairTime(this VehicleTypeEnum vehicleType)
+        {
+            switch (vehicleType)
+            {
+                case VehicleTypeEnum.Car: return 5;
+                case VehicleTypeEnum.Truck: return 7;
+                case VehicleTypeEnum.Motorcycle: return 3;
+                default: throw new DrException("Unsupported vehicle type.");
+            }
         }
         public static int Malfunction(this VehicleClassEnum vehicleClass, MalfunctionTypeEnum type)
         {
@@ -76,11 +82,5 @@ namespace HtecDakarRallyWebApi.Extensions
                 default: throw new DrException("Unsupported vehicle class.");
             };
         }
-
-        public static bool IsFinishStatus(this VehicleStatusEnum status)
-        {
-            return status == VehicleStatusEnum.Broken || status == VehicleStatusEnum.Finished;
-        }
-
     }
 }

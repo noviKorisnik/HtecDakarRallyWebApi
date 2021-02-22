@@ -5,6 +5,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Microsoft.EntityFrameworkCore;
+using HtecDakarRallyWebApi.Services;
+using HtecDakarRallyWebApi.Repositories;
 
 namespace HtecDakarRallyWebApi
 {
@@ -25,9 +27,11 @@ namespace HtecDakarRallyWebApi
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "HtecDakarRallyWebApi", Version = "v1" });
             });
             services.AddDbContext<DrDbContext>(opt => opt.UseInMemoryDatabase("DakarRallyInMemory"));
-            services.AddScoped<DrRepository>();
+            services.AddScoped<RaceRepository>();
+            services.AddScoped<VehicleRepository>();
             services.AddAutoMapper(typeof(Startup));
-            services.AddScoped<DrService>();
+            services.AddScoped<RaceService>();
+            services.AddScoped<VehicleService>();
             services.AddControllers();
         }
 

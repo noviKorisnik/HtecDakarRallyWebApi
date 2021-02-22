@@ -7,13 +7,13 @@ using System.Linq;
 using System;
 using HtecDakarRallyWebApi.Extensions;
 
-namespace HtecDakarRallyWebApi
+namespace HtecDakarRallyWebApi.Repositories
 {
-    public class DrRepository
+    public class RaceRepository
     {
         private readonly DrDbContext _context;
 
-        public DrRepository(DrDbContext context)
+        public RaceRepository(DrDbContext context)
         {
             _context = context;
         }
@@ -51,37 +51,6 @@ namespace HtecDakarRallyWebApi
             return vehicle;
         }
 
-        //3. Update vehicle info
-        //available only prior to the race start
-        //(parameters: vehicle)
-        public async Task UpdateVehicle(int vehicleId, Vehicle update)
-        {
-            Vehicle vehicle = await _context.GetVehicle(vehicleId, true);
-
-            vehicle.Team = update.Team;
-            vehicle.Model = update.Model;
-            vehicle.Manufactured = update.Manufactured;
-            vehicle.Class = update.Class;
-
-            _context.CheckVehicle(vehicle);
-
-            await _context.SaveChangesAsync();
-        }
-
-        //4. Remove vehicle from the race
-        //available only prior to the race start
-        //(parameters: vehicle identifier)
-        public async Task RemoveVehicle(int vehicleId)
-        {
-            Vehicle vehicle = await _context.GetVehicle(vehicleId, true);
-            if (_context.Races.Find(vehicle.RaceId).Status != RaceStatusEnum.Pending)
-            {
-                throw new DrException("Can't remove vehicle from non-pending race.");
-            }
-            vehicle.Race.Vehicles.Remove(vehicle);
-            await _context.SaveChangesAsync();
-        }
-
         private static object locker = new object();
         private static uint _multiplier = 1;
         //5. Start the race
@@ -116,35 +85,6 @@ namespace HtecDakarRallyWebApi
             return new Leaderboard(await _context.GetUpdatedRace(raceId, vehicleTypeEnum));
         }
 
-        //8. Get vehicle statistics:
-        //distance,
-        //malfunction statistics,
-        //status,
-        //finish time
-        //(parameters: vehicle identifier)
-        public async Task<VehicleStat> GetStatistics(int vehicleId)
-        {
-            return new VehicleStat(await _context.GetUpdatedVehicle(vehicleId));
-        }
-
-        //9. Find vehicle(s)
-        //(parameters: team
-        //AND/OR model
-        //AND/OR manufacturing date
-        //AND/OR status
-        //AND/OR distance,
-        //sort order)
-        public async Task<SearchResult> FindVehicles(SearchParams search)
-        {
-            try
-            {
-                await _context.GetUpdatedRace();
-            }
-            catch { }
-
-            return await _context.FindVehicles(search);
-        }
-
         //10. Get race status that includes:
         //race status (pending, running, finished),
         //number of vehicles grouped by vehicle status,
@@ -166,19 +106,6 @@ namespace HtecDakarRallyWebApi
                 _context.SaveChanges();
             }
 
-        }
-
-
-        //test
-        public async Task<List<Vehicle>> GetAllVehicles()
-        {
-            var nj = await _context.Vehicles.ToListAsync();
-
-            return nj;
-        }
-        public async Task<List<Race>> GetAllRaces()
-        {
-            return await _context.Races.ToListAsync();
         }
     }
 }

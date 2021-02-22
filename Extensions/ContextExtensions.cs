@@ -8,15 +8,39 @@ using System.Collections.Generic;
 
 namespace HtecDakarRallyWebApi.Extensions
 {
-    public static class DbContextExtensions
+    public static class ContextExtensions
     {
-
-        public async static Task CheckRaceYear(this DrDbContext context, int year)
+        private async static Task<Race> getRaceWithVehicles(this DrDbContext context, int? raceId = null)
         {
-            if (await context.Races.AnyAsync(race => race.Year == year))
+            Race race = await
+                context
+                .Races
+                .Include("Vehicles.VehicleEvents")
+                .Where(r => raceId.HasValue ? (r.Id == raceId.Value) : (r.Status == RaceStatusEnum.Running))
+                .SingleOrDefaultAsync();
+            if (race == null)
             {
-                throw new DrException(string.Format("Race year must be unique. There is already race for year {0}.", year));
+                throw new DrException(string.Format("Race not found."));
             }
+            return race;
+        }
+        public async static Task<Race> GetUpdatedRace(this DrDbContext context, int? raceId = null, VehicleTypeEnum? vehicleType = null)
+        {
+            Race race = await context.getRaceWithVehicles(raceId);
+            if (race.Status == RaceStatusEnum.Running)
+            {
+                TimeSpan ts = race.CurrentTimeSpan();
+                race.Vehicles
+                    .Where(vehicle => !vehicleType.HasValue || vehicle.Type == vehicleType.Value)
+                    .ToList().ForEach(vehicle => vehicle.UpdateToTime(ts));
+
+                race.SetStatus();
+
+                await context.SaveChangesAsync();
+            }
+            race.LeaderboardType = vehicleType;
+
+            return race;
         }
         public async static Task<Race> GetRace(this DrDbContext context, int? raceId = null, bool throwException = false)
         {
@@ -38,6 +62,30 @@ namespace HtecDakarRallyWebApi.Extensions
                 throw new DrException(string.Format("Race is not in pending state."));
             }
             return race;
+        }
+
+        public static async Task<SearchResult> FindVehicles(this DrDbContext context, SearchParams search)
+        {
+            IQueryable<Vehicle> query = context.Vehicles.Include("Race").Where
+            (
+                vehicle => true
+                    && (!search.Id.HasValue || vehicle.Id == search.Id.Value)
+                    && (!search.RaceId.HasValue || vehicle.RaceId == search.RaceId.Value)
+                    && (string.IsNullOrWhiteSpace(search.Team) || vehicle.Team.Contains(search.Team, StringComparison.InvariantCultureIgnoreCase))
+                    && (string.IsNullOrWhiteSpace(search.Team) || vehicle.Team.Contains(search.Team, StringComparison.InvariantCultureIgnoreCase))
+                    && (!search.FromYear.HasValue || vehicle.Race.Year >= search.FromYear.Value)
+                    && (!search.ToYear.HasValue || vehicle.Race.Year <= search.ToYear.Value)
+                    && (!search.ManufacturedFrom.HasValue || vehicle.Manufactured >= search.ManufacturedFrom.Value)
+                    && (!search.ManufacturedTo.HasValue || vehicle.Manufactured <= search.ManufacturedTo.Value)
+                    && (!search.FromDistance.HasValue || vehicle.Distance >= search.FromDistance.Value)
+                    && (!search.ToDistance.HasValue || vehicle.Distance <= search.ToDistance.Value)
+                    && (search.Class == null || search.Class.Count == 0 || search.Class.Contains(vehicle.Class))
+                    && (search.Type == null || search.Type.Count == 0 || search.Type.Contains(vehicle.Type))
+                    && (search.Status == null || search.Status.Count == 0 || search.Status.Contains(vehicle.Status))
+            )
+            .SortOrder(search.SortOrder);
+            
+            return new SearchResult(search, await query.ToListAsync());
         }
 
         public async static Task<Vehicle> GetUpdatedVehicle(this DrDbContext context, int vehicleId)
@@ -73,6 +121,7 @@ namespace HtecDakarRallyWebApi.Extensions
             }
             return vehicle;
         }
+
         public static void CheckVehicle(this DrDbContext context, Vehicle vehicle)
         {
             Race race = context.Races.Find(vehicle.RaceId);
@@ -88,9 +137,6 @@ namespace HtecDakarRallyWebApi.Extensions
             {
                 throw new DrException(string.Format("Vehicle cannot be manufactured after race year."));
             }
-        }
-        public static void Check(this Vehicle vehicle)
-        {
         }
         public static void CheckNoRunningRace(this DrDbContext context)
         {

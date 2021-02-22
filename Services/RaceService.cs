@@ -5,16 +5,17 @@ using HtecDakarRallyWebApi.DataTransferObjects;
 using AutoMapper;
 using HtecDakarRallyWebApi.Models;
 using System.Linq;
+using HtecDakarRallyWebApi.Repositories;
 
-namespace HtecDakarRallyWebApi
+namespace HtecDakarRallyWebApi.Services
 {
-    public class DrService
+    public class RaceService
     {
         private readonly DrDbContext _context;
-        private readonly DrRepository _repository;
+        private readonly RaceRepository _repository;
         private readonly IMapper _mapper;
 
-        public DrService(DrDbContext context, DrRepository repository, IMapper mapper)
+        public RaceService(DrDbContext context, RaceRepository repository, IMapper mapper)
         {
             _context = context;
             _repository = repository;
@@ -42,22 +43,6 @@ namespace HtecDakarRallyWebApi
             );
         }
 
-        //3. Update vehicle info
-        //available only prior to the race start
-        //(parameters: vehicle)
-        public async Task UpdateVehicle(int vehicleId, VehicleRequestDTO vehicleDTO)
-        {
-            await _repository.UpdateVehicle(vehicleId, _mapper.Map<VehicleRequestDTO, Vehicle>(vehicleDTO));
-        }
-
-        //4. Remove vehicle from the race
-        //available only prior to the race start
-        //(parameters: vehicle identifier)
-        public async Task RemoveVehicle(int vehicleId)
-        {
-            await _repository.RemoveVehicle(vehicleId);
-        }
-
         //5. Start the race
         //only one race can run at the time
         //(parameters: race identifier)
@@ -79,29 +64,6 @@ namespace HtecDakarRallyWebApi
             return _mapper.Map<Leaderboard, LbByTypeDTO>(await _repository.GetLeaderboard(raceId, vehicleType));
         }
 
-        //8. Get vehicle statistics:
-        //distance,
-        //malfunction statistics,
-        //status,
-        //finish time
-        //(parameters: vehicle identifier)
-        public async Task<VehicleStatDTO> GetStatistics(int vehicleId)
-        {
-            return _mapper.Map<VehicleStat, VehicleStatDTO>(await _repository.GetStatistics(vehicleId));
-        }
-
-        //9. Find vehicle(s)
-        //(parameters: team
-        //AND/OR model
-        //AND/OR manufacturing date
-        //AND/OR status
-        //AND/OR distance,
-        //sort order)
-        public async Task<SearchResultDTO> FindVehicles(SearchParmsDTO search)
-        {
-            return _mapper.Map<SearchResult, SearchResultDTO>(await _repository.FindVehicles(_mapper.Map<SearchParmsDTO, SearchParams>(search)));
-        }
-
         //10. Get race status that includes:
         //race status (pending, running, finished),
         //number of vehicles grouped by vehicle status,
@@ -110,16 +72,6 @@ namespace HtecDakarRallyWebApi
         public async Task<RaceStatDTO> GetStatus(int raceId){
             return _mapper.Map<RaceStat, RaceStatDTO>(await _repository.GetStatus(raceId));
         }
-
-
-
-
-
-        public async Task<IEnumerable<VehicleDTO>> GetAllVehicles()
-        {
-            return _mapper.Map<IEnumerable<Vehicle>, IEnumerable<VehicleDTO>>(await _repository.GetAllVehicles());
-        }
-
 
         //Mock
         public async Task<object> Mock()
@@ -143,8 +95,6 @@ namespace HtecDakarRallyWebApi
 
             return true;
         }
-
-
 
         public void SetMultiplier(uint multiplier)
         {
